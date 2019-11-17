@@ -1,6 +1,6 @@
-let fs = require("fs");
-
 require("dotenv").config();
+
+let fs = require("fs");
 
 let keys = require("./keys.js");
 
@@ -14,26 +14,29 @@ let moment = require("moment");
 
 let action = process.argv[2];
 
-// switch statement determines which function to run
-switch (action) {
-    case "concert-this":
-        getConcertInfo();
-        break;
-    case "spotify-this-song":
-        getSongInfo();
-        break;
-    case "movie-this":
-        getMovieInfo();
-        break;
-    case "do-what-it-says":
-        getRandomInfo();
-        break;
+let name = process.argv.splice(3).join();
+
+// determine which function to run
+if (action === "concert-this") {
+    getConcertInfo();
+}
+else if (action === "spotify-this-song") {
+    getSongInfo();
+}
+else if (action === "movie-this") {
+    getMovieInfo();
+}
+else if (action === "do-what-it-says") {
+    getRandomInfo();
+}
+else {
+    console.log("Error: Invalid Entry")
 }
 
 // function for retrieving concert info 
 function getConcertInfo() {
     // input artist name converted to string with no spaces
-    let artistName = process.argv.splice(3).join().replace(/,/g, "");
+    let artistName = name.replace(/,/g, "");
 
     let queryUrl = "https://rest.bandsintown.com/artists/" + artistName + "/events?app_id=codingbootcamp";
 
@@ -41,7 +44,9 @@ function getConcertInfo() {
         // for each concert date / location
         for (let i = 0; i < response.data.length; i++) {
             let concertDate = moment(response.data[i].datetime).format("MM/DD/YYYY");
-            let concertInfo = ["\nVenue Name: " + response.data[i].venue.city + ", " + response.data[i].venue.country + ", Concert Date: " + concertDate + "\n"].join("\n");
+            let concertInfo = ["\nVenue Name: " + response.data[i].venue.name,
+            "Venue Location: " + response.data[i].venue.city + ", " + response.data[i].venue.country,
+            "Concert Date: " + concertDate + "\n"].join("\n");
             console.log(concertInfo);
             // synchronously appends log.txt with concertInfo
             fs.appendFileSync("log.txt", concertInfo, function (error) {
@@ -50,20 +55,22 @@ function getConcertInfo() {
         }
     });
 }
-// NOT RETURNING RESULTS
+
 // function for retrieving song info
 function getSongInfo() {
-    // input song name converted to string with no spaces
-    let songName = process.argv.splice(3).join().replace(/,/g, "");
+    let songName = "";
     // if no song is entered, default to The Sign by Ace of Base 
-    if (songName.length === 0) {
-        songName = "The sign";
+    if (!name) {
+        songName = "the sign";
+    }
+    else {
+        songName = name;
     }
 
     spotify.search({
         type: "track",
         query: songName,
-        limit: 5
+        limit: 5 // number of results
     }, function (error, data) {
         if (error) {
             fs.appendFileSync("log.txt", "Error: " + error, "utf8");
@@ -71,24 +78,23 @@ function getSongInfo() {
         }
 
         for (let i = 0; i < data.tracks.items.length; i++) {
-            songInfo = ["\nSong Title: " + data.tracks.items[i].name +
-                ", Album Title: " + data.tracks.items[i].album.name +
-                ", Artist(s) Name: " + data.tracks.items[i].artists[0].name +
-                ", Preview URL: " + data.tracks.items[i].preview_url + '\n'].join('\n');
+            songInfo = ["\nSong Title: " + data.tracks.items[i].name,
+            "Album Title: " + data.tracks.items[i].album.name,
+            "Artist(s) Name: " + data.tracks.items[i].artists[0].name,
+            "Preview URL: " + data.tracks.items[i].preview_url + '\n'].join('\n');
             console.log(songInfo);
             fs.appendFileSync("log.txt", songInfo, function (error) {
                 if (error) throw error;
             });
         }
     });
-
 }
 
 // function for retrieving movie info
 function getMovieInfo() {
-    let movieName = process.argv.splice(3).join().replace(/,/g, "+");
-
-    if (movieName.length === 0) {
+    let movieName = name.replace(/,/g, "+");
+    // if no movie name entered, default to Mr. Nobody
+    if (!movieName) {
         movieName = "Mr. Nobody";
     }
 
@@ -97,13 +103,12 @@ function getMovieInfo() {
     axios.get(queryUrl).then(function (response) {
         movieInfo = ["\nTitle: " + response.data.Title,
         "Year Released: " + response.data.Year,
-        "Actors: " + response.data.Actors,
-        "Plot: " + response.data.Plot,
+        "IMDB Rating: " + response.data.Ratings[0].Value,
+        "Rotten Tomatoes Rating: " + response.data.Ratings[1].Value,
         "Country: " + response.data.Country,
         "Language: " + response.data.Language,
-        "IMDB Rating: " + response.data.Ratings[0].Value,
-        "Rotten Tomatoes Rating: " + response.data.Ratings[1].Value + '\n'].join('\n');
-
+        "Plot: " + response.data.Plot,
+        "Actors: " + response.data.Actors + '\n'].join('\n');
         console.log(movieInfo);
         fs.appendFile("log.txt", movieInfo, function (error) {
             if (error) throw error;
@@ -116,14 +121,24 @@ function getMovieInfo() {
 function getRandomInfo() {
     fs.readFile("random.txt", "utf8", function (error, data) {
         if (error) throw error;
-        if (data.includes("concert-this")) {
-            console.log(data);
+        else if (data.includes("concert-this")) {
+            let str = data.split(",").pop().replace(/"/g, "");
+            name = str;
+            getConcertInfo();
         }
-        if (data.includes("spotify-this-song")) {
-            console.log(data);
+        else if (data.includes("spotify-this-song")) {
+            let str = data.split(",").pop().replace(/"/g, "");
+            name = str;
+            getSongInfo();
         }
-        if (data.includes("movie-this")) {
-            console.log(data);
+        else if (data.includes("movie-this")) {
+            let str = data.split(",").pop().replace(/"/g, "").replace(/ /g, "+");
+            name = str;
+            getMovieInfo();
+        }
+        else {
+            console.log("Error 1337");
         }
     });
 }
+
