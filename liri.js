@@ -44,8 +44,8 @@ function getConcertInfo() {
             let concertInfo = ["\nVenue Name: " + response.data[i].venue.city + ", " + response.data[i].venue.country + ", Concert Date: " + concertDate + "\n"].join("\n");
             console.log(concertInfo);
             // synchronously appends log.txt with concertInfo
-            fs.appendFileSync("log.txt", concertInfo, function (err) {
-                if (err) throw err;
+            fs.appendFileSync("log.txt", concertInfo, function (error) {
+                if (error) throw error;
             });
         }
     });
@@ -64,10 +64,10 @@ function getSongInfo() {
         type: "track",
         query: songName,
         limit: 5
-    }, function (err, data) {
-        if (err) {
-            fs.appendFileSync("log.txt", "Error: " + err, "utf8");
-            return console.log("Error: " + err);
+    }, function (error, data) {
+        if (error) {
+            fs.appendFileSync("log.txt", "Error: " + error, "utf8");
+            return console.log("Error: " + error);
         }
 
         for (let i = 0; i < data.tracks.items.length; i++) {
@@ -76,8 +76,8 @@ function getSongInfo() {
                 ", Artist(s) Name: " + data.tracks.items[i].artists[0].name +
                 ", Preview URL: " + data.tracks.items[i].preview_url + '\n'].join('\n');
             console.log(songInfo);
-            fs.appendFileSync("log.txt", songInfo, function (err) {
-                if (err) throw err;
+            fs.appendFileSync("log.txt", songInfo, function (error) {
+                if (error) throw error;
             });
         }
     });
@@ -105,14 +105,25 @@ function getMovieInfo() {
         "Rotten Tomatoes Rating: " + response.data.Ratings[1].Value + '\n'].join('\n');
 
         console.log(movieInfo);
-        fs.appendFile("log.txt", movieInfo, function (err) {
-            if (err) throw err;
+        fs.appendFile("log.txt", movieInfo, function (error) {
+            if (error) throw error;
         });
     });
 
 }
 
-// function to read and execute .txt file
+// function to read and execute random.txt
 function getRandomInfo() {
-
+    fs.readFile("random.txt", "utf8", function (error, data) {
+        if (error) throw error;
+        if (data.includes("concert-this")) {
+            console.log(data);
+        }
+        if (data.includes("spotify-this-song")) {
+            console.log(data);
+        }
+        if (data.includes("movie-this")) {
+            console.log(data);
+        }
+    });
 }
