@@ -122,16 +122,19 @@ function getRandomInfo() {
     fs.readFile("random.txt", "utf8", function (error, data) {
         if (error) throw error;
         else if (data.includes("concert-this")) {
+            console.log(data);
             let str = data.split(",").pop().replace(/"/g, "");
             name = str;
             getConcertInfo();
         }
         else if (data.includes("spotify-this-song")) {
+            console.log(data);
             let str = data.split(",").pop().replace(/"/g, "");
             name = str;
             getSongInfo();
         }
         else if (data.includes("movie-this")) {
+            console.log(data);
             let str = data.split(",").pop().replace(/"/g, "").replace(/ /g, "+");
             name = str;
             getMovieInfo();
