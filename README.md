@@ -66,6 +66,7 @@ The OMDB API is queried for movie information:
 
 ### do-what-it-says
 Command: 'node liri.js do-what-it-says'
+
 Note: The outcome of the above command is determined by the contents of the random.txt file
 
 ![do-what-it-says gif](gifs/do-what-it-says.gif)
@@ -73,4 +74,4 @@ Note: The outcome of the above command is determined by the contents of the rand
 ### log.txt
 Each time a command is entered, log.txt is appended with the resulting data
 
-![log.txt gif](gifs/log text.gif)
+![log-data](gifs/log text.gif)
